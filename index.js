@@ -24,6 +24,8 @@ app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, '/index.html'));
 });
 
+app.use(express.static(__dirname + '/static'));
+
 // getting tweets
 var stream = T.stream('statuses/filter', { track: config.HASHTAG })
 stream.on('tweet', function (tweet) {
