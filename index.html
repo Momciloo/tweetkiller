@@ -10,28 +10,18 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <style>
     body,
-    html {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #F7F7F7;
-    }
-
-    canvas {
-      position: relative;
-    }
+    html { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #F7F7F7; }
+    canvas { position: relative; }
   </style>
 </head>
-
 <body>
   <div id="app"></div>
 
   <script>
     var socket = io.connect(), // socket
       pix, tweetText, scoreText, // pixi, tweet & score
-      cursor_pos, explosion, explosionTx = [], // explosion
+      tweetTex_style, scoreText_style, // text styles
+      cursor_pos, explosion, explosionTx = [], texture, // explosion
       width = window.innerWidth,
       height = window.innerHeight; // window dimensions
 
@@ -56,7 +46,7 @@
           document.body.appendChild(pix.view);
 
 
-          var tweetTex_style = new PIXI.TextStyle({ // tweet text style
+          tweetTex_style = new PIXI.TextStyle({ // tweet text style
             fontFamily: 'Roboto',
             fontSize: 20,
             fill: '#453AE4',
@@ -66,10 +56,10 @@
           tweetText.x = (width - tweetText.width) / 2; // position horizontally center
           tweetText.y = (height - tweetText.height) / 2; // position vertically center
           tweetText.on('mouseup', tweetClick); // add click event to tweet
-
-
           pix.stage.addChild(tweetText); // append tweet to stage
-          var scoreText_style = new PIXI.TextStyle({ // score text style
+
+
+          scoreText_style = new PIXI.TextStyle({ // score text style
             fontFamily: 'Roboto',
             fontSize: 12,
             fill: '#E43E3A' });
@@ -102,7 +92,7 @@
           if (this.score == 1) { // display score if score > 0
             pix.stage.addChild(scoreText);
           }
-      }
+        }
       },
       mounted: function() {
         this.setupPixi(); // build pixi
@@ -134,7 +124,7 @@
     }
     function onExplosionLoad() { // store and setup sprite
       for (i = 0; i < 26; i++) {
-        var texture = PIXI.Texture.fromFrame('Explosion_Sequence_A ' + (i + 1) + '.png');
+        texture = PIXI.Texture.fromFrame('Explosion_Sequence_A ' + (i + 1) + '.png');
         explosionTx.push(texture);
       }
       explosion = new PIXI.extras.AnimatedSprite(explosionTx);
@@ -143,5 +133,4 @@
     }
   </script>
 </body>
-
 </html>
