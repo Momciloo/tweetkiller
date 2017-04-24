@@ -1,166 +1,154 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Kill 'Em All</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>
-        <script src="https://unpkg.com/vue/dist/vue.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
-        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-        <style>
-            body,
-            html {
-                width: 100%; height: 100%;
-                margin: 0; padding: 0;
-                overflow: hidden;
-                background-color: #F7F7F7;
+
+<head>
+  <meta charset="utf-8">
+  <title>Kill 'Em All</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <style>
+    body,
+    html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #F7F7F7;
+    }
+
+    canvas {
+      position: relative;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <script>
+    var socket = io.connect(), // socket
+      pix, tweetText, scoreText, // pixi, tweet & score
+      cursor_pos, explosion, explosionTx = [], // explosion
+      width = window.innerWidth,
+      height = window.innerHeight; // window dimensions
+
+    socket.on('tweet', function(data) { // get tweet from server side socket to vue app
+      app.tweet = data.text;
+    });
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        tweet: 'Please wait for the first tweet to load',
+        tweet_count: 0,
+        score: 0,
+      },
+      methods: {
+        setupPixi: function() { // pixi setup
+          pix = new PIXI.Application(width, height, {
+            'transparent': true,
+            'autoResize': true,
+            'antialias': true
+          });
+          document.body.appendChild(pix.view);
+
+          // tweet text style
+          var tweetTex_style = new PIXI.TextStyle({
+            fontFamily: 'Roboto',
+            fontSize: 20,
+            fill: '#453AE4',
+            wordWrap: true,
+            wordWrapWidth: width / 4
+          });
+
+          tweetText = new PIXI.Text(this.tweet, tweetTex_style); // initial tweet value (placeholder)
+
+          tweetText.x = (width - tweetText.width) / 2; // position horizontally center
+          tweetText.y = (height - tweetText.height) / 2; // position vertically center
+
+          tweetText.on('mouseup', tweetClick); // add click event to tweet
+          pix.stage.addChild(tweetText); // append tweet to stage
+
+          var scoreText_style = new PIXI.TextStyle({ // score text style
+            fontFamily: 'Roboto',
+            fontSize: 12,
+            fill: '#E43E3A'
+          });
+
+          scoreText = new PIXI.Text(this.score, scoreText_style);
+
+          PIXI.loader.add('spritesheet', '/sprites/mc.json').load(onExplosionLoad); // add explosion sprite
+
+          function onExplosionLoad() { // store and setup the sprite
+            for (i = 0; i < 26; i++) {
+              var texture = PIXI.Texture.fromFrame('Explosion_Sequence_A ' + (i + 1) + '.png');
+              explosionTx.push(texture);
             }
-            canvas { position: relative; }
-        </style>
-    </head>
-    <body>
-        <div id="app"></div>
+            explosion = new PIXI.extras.AnimatedSprite(explosionTx);
+            explosion.loop = false;
+            explosion.anchor.set(0.5);
+          }
+        },
+      },
+      watch: {
+        'tweet': function(value) { // when data.tweet changes
+          tweetText.text = (this.tweet).toUpperCase(); // uppercase tweet
+          tweetText.style.fontSize = Math.floor(Math.random() * 20) + 9; // random font size
+          this.tweet_count++; // increase total number of tweets shown
 
-        <script>
-            var socket = io.connect(),
-                tweetText, pix, scoreText,
-                cur_pos, explosion, explosionTx = [],
-                width = window.innerWidth,
-                height = window.innerHeight;
+          tweet_top = Math.floor(Math.random() * (width - tweetText.width)) + 0; // random top pos
+          tweet_left = Math.floor(Math.random() * (height - tweetText.height)) + 0; // random left pos
+          tweetText.x = tweet_top; // set top post
+          tweetText.y = tweet_left; // set left pos
 
-            // get tweet from server side socket to vue app
-            socket.on('tweet', function(data) {
-                app.tweet = data.text;
-            });
+        },
+        'tweet_count': function() {
+          if (app.tweet_count == 1) {
+            tweetText.interactive = true; // make tweet clickable
+            tweetText.buttonMode = true;
+          }
+          scoreUpdated();
+        },
+        'score': function() {
+          scoreUpdated();
+          if (this.score == 1) { // display score if score > 0
+            pix.stage.addChild(scoreText);
+          }
+        }
+      },
+      mounted: function() {
+        this.setupPixi(); // build pixi
+      }
+    });
 
-            var app = new Vue({
-                el: '#app',
-                data: {
-                    tweet: 'Please wait for the first tweet to load',
-                    tweet_count: 0,
-                    score: 0,
-                },
-                methods: {
-                    // pixi setup
-                    createPixi: function() {
-                        pix = new PIXI.Application(width, height, {
-                            'transparent': true,
-                            'autoResize': true,
-                            'antialias': true
-                        });
-                        document.body.appendChild(pix.view);
+    function tweetClick() { // on tweet click
+      app.tweet = ''; // remove tweet text
+      app.tweet_count--; // fix score points
 
-                        // tweet text style
-                        var tweetTex_style = new PIXI.TextStyle({
-                            fontFamily: 'Roboto',
-                            fontSize: 20,
-                            fill: '#453AE4',
-                            wordWrap: true,
-                            wordWrapWidth: width / 4
-                        });
+      app.score++; // update score
 
-                        // initial text value (placeholder)
-                        tweetText = new PIXI.Text(this.tweet, tweetTex_style);
+      cursor_pos = pix.renderer.plugins.interaction.mouse.global; // get cursor position
 
-                        // initial text value (placeholder) position: center
-                        tweetText.x = (width - tweetText.width) / 2; // horizontally center
-                        tweetText.y = (height - tweetText.height) / 2; // vertically center
+      explosion.x = cursor_pos.x; // position sprite to cursor position
+      explosion.y = cursor_pos.y; // position sprite to cursor position
 
-                        // add click event to twit
-                        tweetText.on('mouseup', tweetClick);
-                        // add twit to stage
-                        pix.stage.addChild(tweetText);
+      explosion.gotoAndPlay(0);
+      pix.stage.addChild(explosion);
 
-                        // score text style
-                        var scoreText_style = new PIXI.TextStyle({
-                            fontFamily: 'Roboto',
-                            fontSize: 12,
-                            fill: '#E43E3A'
-                        });
+      explosion.onComplete = function() { // on explosion complete
+        pix.stage.removeChild(explosion)
+      };
+    };
 
-                        scoreText = new PIXI.Text(this.score, scoreText_style);
+    function scoreUpdated() {
+      scoreText.text = 'You burned ' + app.score + ' out of ' + app.tweet_count + ' tweets'; // update scoreText
+      scoreText.y = 20; // position score 20px from top
+      scoreText.x = width - scoreText.width - 20; // position score 20px from right
+    }
+  </script>
+</body>
 
-                        // add explosion sprite
-                        PIXI.loader.add('spritesheet', '/sprites/mc.json').load(onExplosionLoad);
-                        function onExplosionLoad() {
-                            // create an array to store the textures
-                            for (i = 0; i < 26; i++) {
-                                var texture = PIXI.Texture.fromFrame('Explosion_Sequence_A ' + (i + 1) + '.png');
-                                explosionTx.push(texture);
-                            }
-                            // create an explosion AnimatedSprite
-                            explosion = new PIXI.extras.AnimatedSprite(explosionTx);
-                            explosion.loop = false;
-                            explosion.anchor.set(0.5);
-                        }
-
-                        function tweetClick() {
-                            app.tweet = '';
-                            app.tweet_count--;
-
-                            // update score
-                            app.score++;
-
-                            // get cursor position
-                            cur_pos = pix.renderer.plugins.interaction.mouse.global;
-
-                            // position sprite to cursor position
-                            explosion.x = cur_pos.x;
-                            explosion.y = cur_pos.y;
-
-                            explosion.gotoAndPlay(0);
-                            pix.stage.addChild(explosion);
-
-                            // on explosion complete
-                            explosion.onComplete = function() {
-                                pix.stage.removeChild(explosion)
-                            };
-                        }
-                    }
-                },
-                watch: {
-                    // when data.tweet changes
-                    'tweet': function(value) {
-                        // tweetText update
-                        tweetText.text = (this.tweet).toUpperCase();
-                        tweetText.style.fontSize = Math.floor(Math.random() * 20) + 9;
-                        this.tweet_count++; // counting total number of tweets shown
-
-                        // random position each new tweet
-                        tweet_top = Math.floor(Math.random() * (width - tweetText.width)) + 0;
-                        tweet_left = Math.floor(Math.random() * (height - tweetText.height)) + 0;
-                        tweetText.x = tweet_top;
-                        tweetText.y = tweet_left;
-
-                    },
-                    'tweet_count': function() {
-                        if (app.tweet_count == 1) {
-                            // make tweet clickable
-                            tweetText.interactive = true;
-                            tweetText.buttonMode = true;
-                        }
-                        // update scoreText
-                        scoreText.text = 'You burned ' + this.score + ' out of ' + this.tweet_count + ' tweets';
-                    },
-                    'score': function() {
-                        // update scoreText
-                        scoreText.text = 'You burned ' + this.score + ' out of ' + this.tweet_count + ' tweets';
-
-                        // position score top right
-                        scoreText.x = width - scoreText.width - 20;
-                        scoreText.y = 20;
-
-                        // only when score is >0 display score text
-                        if (this.score == 1) {
-                            pix.stage.addChild(scoreText);
-                        }
-                    }
-                },
-                mounted: function() {
-                    // create pixi cavas
-                    this.createPixi();
-                }
-            });
-        </script>
-    </body>
 </html>
