@@ -24,6 +24,7 @@
         <script>
             var socket = io.connect(),
                 tweetText, pix, scoreText,
+                cur_pos, explosion, explosionTx = [],
                 width = window.innerWidth,
                 height = window.innerHeight;
 
@@ -79,12 +80,41 @@
 
                         scoreText = new PIXI.Text(this.score, scoreText_style);
 
+                        // add explosion sprite
+                        PIXI.loader.add('spritesheet', '/sprites/mc.json').load(onExplosionLoad);
+                        function onExplosionLoad() {
+                            // create an array to store the textures
+                            for (i = 0; i < 26; i++) {
+                                var texture = PIXI.Texture.fromFrame('Explosion_Sequence_A ' + (i + 1) + '.png');
+                                explosionTx.push(texture);
+                            }
+                            // create an explosion AnimatedSprite
+                            explosion = new PIXI.extras.AnimatedSprite(explosionTx);
+                            explosion.loop = false;
+                            explosion.anchor.set(0.5);
+                        }
+
                         function tweetClick() {
                             app.tweet = '';
                             app.tweet_count--;
 
                             // update score
                             app.score++;
+
+                            // get cursor position
+                            cur_pos = pix.renderer.plugins.interaction.mouse.global;
+
+                            // position sprite to cursor position
+                            explosion.x = cur_pos.x;
+                            explosion.y = cur_pos.y;
+
+                            explosion.gotoAndPlay(0);
+                            pix.stage.addChild(explosion);
+
+                            // on explosion complete
+                            explosion.onComplete = function() {
+                                pix.stage.removeChild(explosion)
+                            };
                         }
                     }
                 },
