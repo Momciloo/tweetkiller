@@ -22,7 +22,7 @@
 
         <script>
             var socket = io.connect(),
-                tweetText, pix,
+                tweetText, pix, scoreText,
                 width = window.innerWidth,
                 height = window.innerHeight;
 
@@ -69,6 +69,15 @@
                         // add twit to stage
                         pix.stage.addChild(tweetText);
 
+                        // score text style
+                        var scoreText_style = new PIXI.TextStyle({
+                            fontFamily: 'Roboto',
+                            fontSize: 12,
+                            fill: '#E43E3A'
+                        });
+
+                        scoreText = new PIXI.Text(this.score, scoreText_style);
+
                         function tweetClick() {
                             app.tweet = '';
 
@@ -90,7 +99,7 @@
                         tweet_left = Math.floor(Math.random() * (height - tweetText.height)) + 0;
                         tweetText.x = tweet_top;
                         tweetText.y = tweet_left;
-                        
+
                     },
                     'tweet_count': function() {
                         if (app.tweet_count == 1) {
@@ -99,6 +108,19 @@
                             tweetText.buttonMode = true;
                         }
                     },
+                    'score': function() {
+                        // update scoreText
+                        scoreText.text = 'You burned ' + this.score + ' out of ' + this.tweet_count + ' tweets';
+
+                        // position score top right
+                        scoreText.x = width - scoreText.width - 20;
+                        scoreText.y = 20;
+
+                        // only when score is >0 display score text
+                        if (this.score == 1) {
+                            pix.stage.addChild(scoreText);
+                        }
+                    }
                 },
                 mounted: function() {
                     // create pixi cavas
