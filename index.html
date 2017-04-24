@@ -62,8 +62,17 @@
                         tweetText.x = (width - tweetText.width) / 2; // horizontally center
                         tweetText.y = (height - tweetText.height) / 2; // vertically center
 
+                        // make tweet clickable
+                        tweetText.interactive = true;
+                        tweetText.buttonMode = true;
+                        // add click event to twit
+                        tweetText.on('mouseup', tweetClick);
                         // add twit to stage
                         pix.stage.addChild(tweetText);
+
+                        function tweetClick() {
+                            app.tweet = '';
+                        }
                     }
                 },
                 watch: {
