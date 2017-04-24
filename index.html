@@ -35,6 +35,7 @@
                 el: '#app',
                 data: {
                     tweet: 'Please wait for the first tweet to load',
+                    tweet_count: 0,
                 },
                 methods: {
                     // pixi setup
@@ -81,6 +82,7 @@
                         // tweetText update
                         tweetText.text = (this.tweet).toUpperCase();
                         tweetText.style.fontSize = Math.floor(Math.random() * 20) + 9;
+                        this.tweet_count++; // counting total number of tweets shown
                     },
                 },
                 mounted: function() {
