@@ -2,9 +2,28 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Index page</title>
+        <title>Kill 'Em All</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>
+        <script src="https://unpkg.com/vue/dist/vue.js"></script>
     </head>
     <body>
-        <h1>This is index page</h1>
+        <div id="app">
+            <p>{{ tweet }}</p>
+        </div>
+
+        <script>
+            var socket = io.connect();
+
+            socket.on('tweet', function(data) {
+                app.tweet = data.text;
+            });
+
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    tweet: 'Please wait for the first tweet to load',
+                }
+            });
+        </script>
     </body>
 </html>
