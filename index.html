@@ -107,6 +107,8 @@
                             tweetText.interactive = true;
                             tweetText.buttonMode = true;
                         }
+                        // update scoreText
+                        scoreText.text = 'You burned ' + this.score + ' out of ' + this.tweet_count + ' tweets';
                     },
                     'score': function() {
                         // update scoreText
