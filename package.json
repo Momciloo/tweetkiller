@@ -1,0 +1,19 @@
+{
+  "name": "tweetkiller",
+  "version": "1.0.0",
+  "description": "Click on tweets to gain score. Click. Fast.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Momciloo/tweetkiller.git"
+  },
+  "author": "Momcilo Popov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Momciloo/tweetkiller/issues"
+  },
+  "homepage": "https://github.com/Momciloo/tweetkiller#readme"
+}
