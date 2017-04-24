@@ -80,6 +80,13 @@
                         tweetText.text = (this.tweet).toUpperCase();
                         tweetText.style.fontSize = Math.floor(Math.random() * 20) + 9;
                         this.tweet_count++; // counting total number of tweets shown
+
+                        // random position each new tweet
+                        tweet_top = Math.floor(Math.random() * (width - tweetText.width)) + 0;
+                        tweet_left = Math.floor(Math.random() * (height - tweetText.height)) + 0;
+                        tweetText.x = tweet_top;
+                        tweetText.y = tweet_left;
+                        
                     },
                     'tweet_count': function() {
                         if (app.tweet_count == 1) {
