@@ -36,6 +36,7 @@
                 data: {
                     tweet: 'Please wait for the first tweet to load',
                     tweet_count: 0,
+                    score: 0,
                 },
                 methods: {
                     // pixi setup
@@ -70,6 +71,9 @@
 
                         function tweetClick() {
                             app.tweet = '';
+
+                            // update score
+                            app.score++;
                         }
                     }
                 },
