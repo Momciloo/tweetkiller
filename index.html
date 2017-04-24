@@ -55,42 +55,28 @@
           });
           document.body.appendChild(pix.view);
 
-          // tweet text style
-          var tweetTex_style = new PIXI.TextStyle({
+
+          var tweetTex_style = new PIXI.TextStyle({ // tweet text style
             fontFamily: 'Roboto',
             fontSize: 20,
             fill: '#453AE4',
             wordWrap: true,
-            wordWrapWidth: width / 4
-          });
-
+            wordWrapWidth: width / 4 });
           tweetText = new PIXI.Text(this.tweet, tweetTex_style); // initial tweet value (placeholder)
-
           tweetText.x = (width - tweetText.width) / 2; // position horizontally center
           tweetText.y = (height - tweetText.height) / 2; // position vertically center
-
           tweetText.on('mouseup', tweetClick); // add click event to tweet
-          pix.stage.addChild(tweetText); // append tweet to stage
 
+
+          pix.stage.addChild(tweetText); // append tweet to stage
           var scoreText_style = new PIXI.TextStyle({ // score text style
             fontFamily: 'Roboto',
             fontSize: 12,
-            fill: '#E43E3A'
-          });
-
+            fill: '#E43E3A' });
           scoreText = new PIXI.Text(this.score, scoreText_style);
 
-          PIXI.loader.add('spritesheet', '/sprites/mc.json').load(onExplosionLoad); // add explosion sprite
 
-          function onExplosionLoad() { // store and setup the sprite
-            for (i = 0; i < 26; i++) {
-              var texture = PIXI.Texture.fromFrame('Explosion_Sequence_A ' + (i + 1) + '.png');
-              explosionTx.push(texture);
-            }
-            explosion = new PIXI.extras.AnimatedSprite(explosionTx);
-            explosion.loop = false;
-            explosion.anchor.set(0.5);
-          }
+          PIXI.loader.add('spritesheet', '/sprites/mc.json').load(onExplosionLoad); // add explosion sprite
         },
       },
       watch: {
@@ -103,21 +89,20 @@
           tweet_left = Math.floor(Math.random() * (height - tweetText.height)) + 0; // random left pos
           tweetText.x = tweet_top; // set top post
           tweetText.y = tweet_left; // set left pos
-
         },
-        'tweet_count': function() {
+        'tweet_count': function() { // on tweet count update
           if (app.tweet_count == 1) {
             tweetText.interactive = true; // make tweet clickable
             tweetText.buttonMode = true;
           }
-          scoreUpdated();
+          scoreTextUpdate();
         },
-        'score': function() {
-          scoreUpdated();
+        'score': function() { // on score update
+          scoreTextUpdate();
           if (this.score == 1) { // display score if score > 0
             pix.stage.addChild(scoreText);
           }
-        }
+      }
       },
       mounted: function() {
         this.setupPixi(); // build pixi
@@ -142,11 +127,19 @@
         pix.stage.removeChild(explosion)
       };
     };
-
-    function scoreUpdated() {
+    function scoreTextUpdate() { // on score update
       scoreText.text = 'You burned ' + app.score + ' out of ' + app.tweet_count + ' tweets'; // update scoreText
       scoreText.y = 20; // position score 20px from top
       scoreText.x = width - scoreText.width - 20; // position score 20px from right
+    }
+    function onExplosionLoad() { // store and setup sprite
+      for (i = 0; i < 26; i++) {
+        var texture = PIXI.Texture.fromFrame('Explosion_Sequence_A ' + (i + 1) + '.png');
+        explosionTx.push(texture);
+      }
+      explosion = new PIXI.extras.AnimatedSprite(explosionTx);
+      explosion.loop = false;
+      explosion.anchor.set(0.5);
     }
   </script>
 </body>
