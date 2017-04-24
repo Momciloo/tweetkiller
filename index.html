@@ -63,9 +63,6 @@
                         tweetText.x = (width - tweetText.width) / 2; // horizontally center
                         tweetText.y = (height - tweetText.height) / 2; // vertically center
 
-                        // make tweet clickable
-                        tweetText.interactive = true;
-                        tweetText.buttonMode = true;
                         // add click event to twit
                         tweetText.on('mouseup', tweetClick);
                         // add twit to stage
@@ -83,6 +80,13 @@
                         tweetText.text = (this.tweet).toUpperCase();
                         tweetText.style.fontSize = Math.floor(Math.random() * 20) + 9;
                         this.tweet_count++; // counting total number of tweets shown
+                    },
+                    'tweet_count': function() {
+                        if (app.tweet_count == 1) {
+                            // make tweet clickable
+                            tweetText.interactive = true;
+                            tweetText.buttonMode = true;
+                        }
                     },
                 },
                 mounted: function() {
